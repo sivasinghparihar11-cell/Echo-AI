@@ -1,67 +1,40 @@
 const express = require('express');
 const cors = require('cors');
-const { search } = require('ddg-scraper');
-const ollama = require('ollama');
+const Groq = require('groq-sdk');
 
 const app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-// --- ECHO IDENTITY & RULES (Strictly as per Founder) ---
+// Groq Setup (Ye Render ki settings se key uthayega)
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
 const systemInstruction = `
     Identity: ( mera naam Echo hai mere Malik Ram Singh Parihar )
     
-    Language Rules:
-    1. STRICT HINGLISH: Sirf waisi bhasha jo hum dosto se WhatsApp par karte hain.
-    2. NO SHUDDH HINDI: 'Tuajhko', 'Vishesh', 'Parihara' jaise shuddh shabd BILKUL use na karein.
-    3. NO ENGLISH ONLY: Pura jawab sirf English mein na dein.
-    4. SHORT RESPONSE: Jawab hamesha chota aur seedha rakhein.
-    
-    Aap ek India-born AI ho aur privacy-first kaam karte ho.
+    STRICT RULES:
+    1. SIRF HINGLISH: WhatsApp style mein baat karein.
+    2. NO SHUDDH HINDI: 'Tuajhko' ya 'Parihara' jaise shabd ban hain.
+    3. SHORT & FAST: Jawab hamesha chota aur desi rakhein.
 `;
 
 app.post('/api/chat', async (req, res) => {
     const { prompt } = req.body;
-    console.log("Ram Sir:", prompt);
-
     try {
-        // RAG: Internet Search
-        console.log("🔍 Searching...");
-        let internetData = "";
-        try {
-            const results = await search(prompt);
-            internetData = results.slice(0, 2).map(r => r.snippet).join(" ").substring(0, 300);
-        } catch (e) { console.log("Search busy."); }
-
-        // Local Brain Thinking
-        console.log("🧠 Thinking...");
-        const response = await ollama.default.chat({
-            model: 'phi3', // Speed ke liye best
+        const chatCompletion = await groq.chat.completions.create({
             messages: [
-                { role: 'system', content: systemInstruction },
-                { role: 'user', content: `Data: ${internetData}\n\nUser: ${prompt}` }
+                { role: "system", content: systemInstruction },
+                { role: "user", content: prompt }
             ],
-            options: {
-                temperature: 0.1, // Isse AI hamesha rules follow karega aur "Ni hao" nahi bolega
-                num_predict: 100
-            }
+            model: "llama3-8b-8192", 
+            temperature: 0.1, // Isse Echo bhatkegi nahi
         });
 
-        res.json({ response: response.message.content });
-
+        res.json({ response: chatCompletion.choices[0].message.content });
     } catch (error) {
-        console.log("Error logic active...");
-        try {
-            const backup = await ollama.default.chat({ 
-                model: 'phi3', 
-                messages: [{role: 'user', content: prompt}] 
-            });
-            res.json({ response: backup.message.content });
-        } catch (err) {
-            res.json({ response: "Sir, Ollama check karein, shayad restart ki zaroorat hai." });
-        }
+        res.json({ response: "Bhai, server busy hai. Thodi der baad try kar!" });
     }
 });
 
-const PORT = 5000;
-app.listen(PORT, () => console.log(`🚀 Echo (Ram Sir's Assistant) is Online!`));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Echo Cloud Brain is LIVE!`));
