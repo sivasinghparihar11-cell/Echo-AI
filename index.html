@@ -1,34 +1,77 @@
-<script>
-    // AAPKA NAYA CLOUD RENDER LINK
-    const SERVER_URL = 'https://echo-ai-iuu3.onrender.com/api/chat';
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo AI - Ram Singh Parihar</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; }
+        #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 12px; border-radius: 15px; font-size: 16px; line-height: 1.4; }
+        .user { align-self: flex-end; background: #6c5ce7; border-bottom-right-radius: 2px; }
+        .echo { align-self: flex-start; background: #2d3436; border-bottom-left-radius: 2px; border: 1px solid #6c5ce7; }
+        #input-area { padding: 20px; background: #111; display: flex; gap: 10px; border-top: 1px solid #333; }
+        input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #444; background: #000; color: white; outline: none; }
+        button { background: #6c5ce7; border: none; padding: 10px 20px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; }
+        #status { font-size: 12px; color: #aaa; text-align: center; margin-bottom: 5px; }
+        .logo-img { width: 50px; display: block; margin: 10px auto; border-radius: 50%; box-shadow: 0 0 15px #6c5ce7; }
+    </style>
+</head>
+<body>
+    <img src="logo.png" class="logo-img" alt="Echo Logo">
+    <div id="status">Echo Cloud par Azad hai 🚀</div>
+    <div id="chat-container"></div>
+    <div id="input-area">
+        <input type="text" id="msgInput" placeholder="Echo se kuch pucho..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Bhejo</button>
+    </div>
 
-    async function sendMessage() {
-        const input = document.getElementById('msgInput');
-        const message = input.value.trim();
-        if(!message) return;
+    <script>
+        // RENDER CLOUD LINK - DO NOT CHANGE
+        const SERVER_URL = 'https://echo-ai-iuu3.onrender.com/api/chat';
 
-        appendMessage('user', message);
-        input.value = '';
-        document.getElementById('status').innerText = 'Echo soch rahi hai...';
+        const container = document.getElementById('chat-container');
 
-        try {
-            const res = await fetch(SERVER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: message })
-            });
-            const data = await res.json();
-            document.getElementById('status').innerText = '';
-            appendMessage('echo', data.response);
-            
-            // Voice support
-            window.speechSynthesis.cancel();
-            const s = new SpeechSynthesisUtterance(data.response);
-            s.lang = 'hi-IN';
-            window.speechSynthesis.speak(s);
-        } catch (err) {
-            document.getElementById('status').innerText = 'Server thoda slow hai, ruko...';
+        function appendMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = `msg ${role}`;
+            div.innerText = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
         }
-    }
-    // ... baaki add message wala function waisa hi rahega
-</script>
+
+        async function sendMessage() {
+            const input = document.getElementById('msgInput');
+            const message = input.value.trim();
+            if(!message) return;
+
+            appendMessage('user', message);
+            input.value = '';
+            document.getElementById('status').innerText = 'Echo soch rahi hai...';
+
+            try {
+                const res = await fetch(SERVER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: message })
+                });
+                const data = await res.json();
+                document.getElementById('status').innerText = 'Online';
+                appendMessage('echo', data.response);
+                
+                // Voice Response
+                window.speechSynthesis.cancel();
+                const speech = new SpeechSynthesisUtterance(data.response);
+                speech.lang = 'hi-IN';
+                window.speechSynthesis.speak(speech);
+
+            } catch (err) {
+                document.getElementById('status').innerText = 'Connection error! Check Render logs.';
+                appendMessage('echo', "Bhai, server connect nahi ho raha. Check karo Render Live hai ya nahi?");
+            }
+        }
+    </script>
+</body>
+</html>
+
