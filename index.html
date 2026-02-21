@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Echo AI - Ram Singh Parihar</title>
-    <link rel="manifest" href="manifest.json">
     <style>
         body { background: #050505; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; }
         #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
@@ -15,12 +14,12 @@
         input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #444; background: #000; color: white; outline: none; }
         button { background: #6c5ce7; border: none; padding: 10px 20px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; }
         #status { font-size: 12px; color: #aaa; text-align: center; margin-bottom: 5px; }
-        .logo-img { width: 50px; display: block; margin: 10px auto; border-radius: 50%; box-shadow: 0 0 15px #6c5ce7; }
+        .logo-img { width: 60px; display: block; margin: 15px auto; border-radius: 50%; box-shadow: 0 0 20px #6c5ce7; }
     </style>
 </head>
 <body>
     <img src="logo.png" class="logo-img" alt="Echo Logo">
-    <div id="status">Echo Cloud par Azad hai 🚀</div>
+    <div id="status">Echo Cloud Brain: Connected 🚀</div>
     <div id="chat-container"></div>
     <div id="input-area">
         <input type="text" id="msgInput" placeholder="Echo se kuch pucho..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -28,7 +27,7 @@
     </div>
 
     <script>
-        // RENDER CLOUD LINK - DO NOT CHANGE
+        // AAPKA FINAL RENDER LINK
         const SERVER_URL = 'https://echo-ai-iuu3.onrender.com/api/chat';
 
         const container = document.getElementById('chat-container');
@@ -56,6 +55,9 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt: message })
                 });
+                
+                if (!res.ok) throw new Error('Server error');
+                
                 const data = await res.json();
                 document.getElementById('status').innerText = 'Online';
                 appendMessage('echo', data.response);
@@ -67,11 +69,13 @@
                 window.speechSynthesis.speak(speech);
 
             } catch (err) {
-                document.getElementById('status').innerText = 'Connection error! Check Render logs.';
-                appendMessage('echo', "Bhai, server connect nahi ho raha. Check karo Render Live hai ya nahi?");
+                console.error(err);
+                document.getElementById('status').innerText = 'Error: Connection Failed';
+                appendMessage('echo', "Ram bhai, server se connection nahi ho paa raha. Ek baar check karo Render par 'Live' likha hai ya nahi?");
             }
         }
     </script>
 </body>
 </html>
+
 
