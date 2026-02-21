@@ -1,86 +1,34 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Echo AI Saathi</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f1115">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    
-    <style>
-        body { background: #0f1115; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; margin: 0; overflow: hidden; }
-        .header { padding: 15px; background: #16181d; border-bottom: 1px solid #333; text-align: center; }
-        .logo { width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 0 20px #6c5ce7; margin-bottom: 8px; }
-        #chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: radial-gradient(circle at top, #1a1d23, #0f1115); }
-        .msg { padding: 14px 18px; border-radius: 15px; max-width: 85%; line-height: 1.5; font-size: 16px; }
-        .user { background: linear-gradient(135deg, #6c5ce7, #a29bfe); align-self: flex-end; border-bottom-right-radius: 2px; }
-        .echo { background: #1a1d23; align-self: flex-start; border: 1px solid #333; border-bottom-left-radius: 2px; }
-        .input-area { padding: 20px; display: flex; gap: 10px; background: #16181d; border-top: 1px solid #333; padding-bottom: 30px; }
-        input { flex: 1; padding: 15px 20px; border-radius: 30px; border: 1px solid #444; background: #000; color: white; outline: none; font-size: 16px; }
-        button { background: #6c5ce7; color: white; border: none; padding: 10px 25px; border-radius: 30px; font-weight: bold; }
-        .status { font-size: 12px; color: #6c5ce7; text-align: center; display: none; margin-bottom: 5px; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <img src="logo.png" class="logo" alt="Echo Logo">
-        <h2 style="margin:0; color: #6c5ce7; letter-spacing: 1px;">ECHO AI</h2>
-        <small style="color: #888;">India-born AI Brand</small>
-    </div>
+<script>
+    // AAPKA NAYA CLOUD RENDER LINK
+    const SERVER_URL = 'https://echo-ai-iuu3.onrender.com/api/chat';
 
-    <div id="chat-box"></div>
-    <div id="status" class="status">Echo soch rahi hai...</div>
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const message = input.value.trim();
+        if(!message) return;
 
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Hukum karein, Ram Sir..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button onclick="sendMessage()">Bhejein</button>
-    </div>
+        appendMessage('user', message);
+        input.value = '';
+        document.getElementById('status').innerText = 'Echo soch rahi hai...';
 
-    <script>
-        // AAPKA IPv6 ADDRESS YAHAN HAI
-        const SERVER_URL = 'http://[2401:4900:8822:4579:6f84:c0e5:ddf0:a8df]:5000/api/chat';
-
-        async function sendMessage() {
-            const input = document.getElementById('userInput');
-            const message = input.value.trim();
-            if(!message) return;
-
-            appendMessage('user', message);
-            input.value = '';
-            document.getElementById('status').style.display = 'block';
-
-            try {
-                const res = await fetch(SERVER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: message })
-                });
-                const data = await res.json();
-                document.getElementById('status').style.display = 'none';
-                appendMessage('echo', data.response);
-                speak(data.response);
-            } catch (err) {
-                document.getElementById('status').style.display = 'none';
-                appendMessage('echo', "Error: Server se connect nahi ho pa raha. Ram Sir ka PC on hai?");
-            }
-        }
-
-        function appendMessage(role, text) {
-            const div = document.createElement('div');
-            div.className = `msg ${role}`;
-            div.innerText = text;
-            const chatBox = document.getElementById('chat-box');
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function speak(text) {
+        try {
+            const res = await fetch(SERVER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: message })
+            });
+            const data = await res.json();
+            document.getElementById('status').innerText = '';
+            appendMessage('echo', data.response);
+            
+            // Voice support
             window.speechSynthesis.cancel();
-            const s = new SpeechSynthesisUtterance(text);
+            const s = new SpeechSynthesisUtterance(data.response);
             s.lang = 'hi-IN';
             window.speechSynthesis.speak(s);
+        } catch (err) {
+            document.getElementById('status').innerText = 'Server thoda slow hai, ruko...';
         }
-    </script>
-</body>
-</html>
+    }
+    // ... baaki add message wala function waisa hi rahega
+</script>
