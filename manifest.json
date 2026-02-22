@@ -1,7 +1,7 @@
 {
   "name": "Echo AI Saathi",
   "short_name": "Echo",
-  "description": "India-born local-first AI by Ram Singh Parihar",
+  "description": "India-born local-first AI",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0f1115",
@@ -14,4 +14,5 @@
       "purpose": "any maskable"
     }
   ]
+
 }
